@@ -1,4 +1,4 @@
-const playingGrid = (function() {
+const GameBoard = (function() {
   const grid = new Array(9);
 
   function assert(...indices) {
@@ -66,7 +66,25 @@ const playingGrid = (function() {
     for (let index = 0; index <= 8; index++) {
       grid[index] = null;
     }
-  }
+  };
+
   return { playOne, playTwo, getSquare, isEmpty, rowWins, colWins, diagWins, reset };
 })();
 
+function Player(name, isAIOn) {
+  console.assert(
+    typeof name === "string" &&
+    typeof isAI === "boolean"
+  );
+
+  const _name = name;
+  const _isAI = isAIOn;
+  let _wins = 0;
+
+  const getName = () => _name;
+  const isAI = () => _isAI;
+  const getWins = () => _wins;
+  const hasWon = () => { _wins++ };
+
+  return { isAI, getName, getWins, hasWon };
+}
