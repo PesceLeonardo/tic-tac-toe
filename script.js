@@ -86,5 +86,7 @@ function Player(name, isAIOn) {
   const getWins = () => _wins;
   const hasWon = () => { _wins++ };
 
-  return { isAI, getName, getWins, hasWon };
+  const resetWins = () => { _wins = 0 };
+
+  return { isAI, getName, getWins, hasWon, resetWins };
 }
