@@ -62,13 +62,13 @@ const GameBoard = (function() {
     return false;
   };
 
-  const reset = () => {
+  const resetBoard = () => {
     for (let index = 0; index <= 8; index++) {
       grid[index] = null;
     }
   };
 
-  return { playOne, playTwo, getSquare, isEmpty, rowWins, colWins, diagWins, reset };
+  return { playOne, playTwo, getSquare, isEmpty, rowWins, colWins, diagWins, resetBoard };
 })();
 
 function Player(name, isAIOn) {
