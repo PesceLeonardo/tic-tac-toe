@@ -1,0 +1,71 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --body-padding: 10px;
+  --sidebar-size: 300px;
+  --main-padding: 128px;
+  --container-gap: 10px;
+}
+
+body {
+  padding: var(--body-padding);
+  height: calc(100vh - var(--body-padding) * 2);
+  display: flex;
+}
+
+aside {
+  flex: 0 0 var(--sidebar-size);
+  background-color: grey;
+}
+
+main {
+  padding: var(--main-padding);
+
+  flex: 1;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  padding: var(--container-gap);
+  height: 100%;
+  aspect-ratio: 1;
+  
+  background-color: rgb(190, 190, 190);
+  box-shadow: 0 0 24px -4px rgba(0, 0, 0, 0.6);
+  border-radius: 16px;
+
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  gap: var(--container-gap);
+}
+
+.container div {
+  padding: 10px;
+
+  background-color: white;
+  box-shadow: 0 0 24px -2px rgba(0, 94, 255, 0.2);
+  border-radius: 16px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+svg {
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.4));
+}
+
+svg path,
+svg circle.out {
+  fill: grey;
+}
+
+svg circle.in {
+  fill: white;
+}
