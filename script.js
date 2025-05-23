@@ -117,6 +117,12 @@ const Game = (function() {
     _isFilled = true;
   };
 
+  const emptyGrid = () => {
+    if (_isFilled) {
+      _container.innerHTML = "";
+    }
+  };
+
   const addCross = (row, col) => {
     assert(row, col);
 
