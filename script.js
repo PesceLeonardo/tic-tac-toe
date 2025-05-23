@@ -163,7 +163,7 @@ const Game = (function() {
     _nthCell.appendChild(_svg);
   };
 
-  return { fillUpGrid, addCross, addCircle };
+  return { fillUpGrid, emptyGrid, addCross, addCircle };
 })();
 
 Game.fillUpGrid();
