@@ -3,16 +3,13 @@ const playingGrid = (function() {
                 [null, null, null],
                 [null, null, null]];
 
-  function assert(i, j) {
-    console.assert(
-      typeof i === "number" &&
-      i >= 0 && i <= 2
-    );
-
-    if (j !== undefined) console.assert(
-      typeof j === "number" &&
-      j >= 0 && j <= 2
-    );
+  function assert(...indices) {
+    for (const index of indices) {
+      console.assert(
+        typeof index === "number" &&
+        index >= 0 && index <= 2
+      );
+    }
   }
 
   const playOne = (i, j) => {
