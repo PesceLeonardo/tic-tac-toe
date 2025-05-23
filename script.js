@@ -104,11 +104,15 @@ const Game = (function() {
     }
   }
 
-  const fillUpGrid = () => {
-    const _divTemplate = document.createElement("div");
-    for (let i = 0; i <= 8; i++) {
-      const _div = _divTemplate.cloneNode(true);
-      _container.appendChild(_div);
+  const fillUpGrid = (callBack) => {
+    for (let row = 0; row <= 2; row++) {
+      for (let col = 0; col <= 2; col++){
+        const _div = document.createElement("div");
+        _div.setAttribute("data-row", `${row}`);
+        _div.setAttribute("data-col", `${col}`);
+        _div.addEventListener("click", callBack);
+        _container.appendChild(_div);
+      }
     }
     _isFilled = true;
   };
@@ -162,3 +166,4 @@ Game.addCross(1, 1);
 Game.addCircle(0, 0);
 Game.addCross(0, 2);
 Game.addCircle(2, 0);
+
