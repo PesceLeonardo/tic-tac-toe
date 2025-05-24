@@ -71,24 +71,26 @@ const GameBoard = (function() {
   return { playOne, playTwo, getSquare, isEmpty, rowWins, colWins, diagWins, resetBoard };
 })();
 
-function Player(name, isAIOn) {
+function Player(name, ID, isAIOn) {
   console.assert(
     typeof name === "string" &&
     typeof isAI === "boolean"
   );
 
   const _name = name;
+  const _id = ID;
   const _isAI = isAIOn;
   let _wins = 0;
 
   const getName = () => _name;
+  const getID = () => _id;
   const isAI = () => _isAI;
   const getWins = () => _wins;
   const hasWon = () => { _wins++ };
 
   const resetWins = () => { _wins = 0 };
 
-  return { isAI, getName, getWins, hasWon, resetWins };
+  return { isAI, getName, getID, getWins, hasWon, resetWins };
 }
 
 const Game = (function() {
@@ -173,3 +175,10 @@ Game.addCircle(0, 0);
 Game.addCross(0, 2);
 Game.addCircle(2, 0);
 
+
+/*
+
+Have a 
+
+
+*/
