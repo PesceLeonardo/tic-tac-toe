@@ -96,6 +96,7 @@ function Player(name, ID, isAIOn) {
 const Game = (function() {
   const _container = document.querySelector(".container");
   let _isFilled = false;
+  let _turnCounter = 0;
 
   function assert(...indices) {
     for (const index of indices) {
@@ -124,6 +125,9 @@ const Game = (function() {
       _container.innerHTML = "";
     }
   };
+
+  const getTurnCount = () => _turnCounter;
+  const incrementTurnCount = () => { _turnCounter++ };
 
   const addCross = (row, col) => {
     assert(row, col);
@@ -165,7 +169,7 @@ const Game = (function() {
     _nthCell.appendChild(_svg);
   };
 
-  return { fillUpGrid, emptyGrid, addCross, addCircle };
+  return { fillUpGrid, emptyGrid, getTurnCount, incrementTurnCount, addCross, addCircle };
 })();
 
 Game.fillUpGrid();
@@ -178,7 +182,9 @@ Game.addCircle(2, 0);
 
 /*
 
-Have a 
-
+Select cell
+If cell is empty, place current player's sign, else do nothing
+Once a sign has been placed, change player
+Loop until game counter has reached 9 or there has been a win
 
 */
