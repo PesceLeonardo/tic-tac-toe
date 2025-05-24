@@ -8,6 +8,8 @@
   --sidebar-size: 300px;
   --main-padding: 128px;
   --container-gap: 10px;
+  --background-grey: rgb(190, 190, 190);
+  --background-shadow: rgba(0, 0, 0, 0.6);
 }
 
 body {
@@ -18,7 +20,9 @@ body {
 
 aside {
   flex: 0 0 var(--sidebar-size);
-  background-color: grey;
+  background-color: var(--background-grey);
+  box-shadow: 0 0 16px -8px var(--background-shadow);
+  border-radius: 16px;
 }
 
 main {
@@ -36,8 +40,8 @@ main {
   height: 100%;
   aspect-ratio: 1;
   
-  background-color: rgb(190, 190, 190);
-  box-shadow: 0 0 24px -4px rgba(0, 0, 0, 0.6);
+  background-color: var(--background-grey);
+  box-shadow: 0 0 24px -4px var(--background-shadow);
   border-radius: 16px;
 
   display: grid;
