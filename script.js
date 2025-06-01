@@ -27,7 +27,7 @@ const GameBoard = (function() {
 
   const isEmpty = (row, col) => {
     assert(row, col);
-    return grid[row * 3 + col] === null;
+    return !grid[row * 3 + col];
   };
 
   const rowWins = (row) => {
@@ -62,13 +62,27 @@ const GameBoard = (function() {
     return false;
   };
 
+  const anyWins = () => {
+    let _win = 0;
+    for (let row = 0; row <= 2; row++) {
+      _win = rowWins(row);
+      if (_win) return _win;
+    }
+    for (let col = 0; col <= 2; col++) {
+      _win = colWins(col);
+      if (_win) return _win;
+    }
+    _win = diagWins();
+    return _win;
+  }
+
   const resetBoard = () => {
     for (let index = 0; index <= 8; index++) {
       grid[index] = null;
     }
   };
 
-  return { playOne, playTwo, getSquare, isEmpty, rowWins, colWins, diagWins, resetBoard };
+  return { playOne, playTwo, getSquare, isEmpty, rowWins, colWins, diagWins, anyWins, resetBoard };
 })();
 
 function Player(name, ID, isAIOn) {
@@ -97,6 +111,7 @@ const Game = (function() {
   const _container = document.querySelector(".container");
   let _isFilled = false;
   let _turnCounter = 0;
+  let _currentPlayer = 1;
 
   function assert(...indices) {
     for (const index of indices) {
@@ -127,7 +142,10 @@ const Game = (function() {
   };
 
   const getTurnCount = () => _turnCounter;
-  const incrementTurnCount = () => { _turnCounter++ };
+  const incrementTurnCount = () => { _turnCounter++; };
+
+  const getPlayer = () => _currentPlayer;
+  const changePlayer = () => { _currentPlayer *= -1; }
 
   const addCross = (row, col) => {
     assert(row, col);
@@ -165,26 +183,32 @@ const Game = (function() {
     _circleIn.classList.add("in");
     _svg.appendChild(_circleIn);
 
-    const _nthCell = document.querySelector(`.container div:nth-of-type(${row * 3 + col + 1})`);
+    const _nthCell = document.querySelector(`.container div:nth-child(${Number(row) * 3 + Number(col) + 1})`);
     _nthCell.appendChild(_svg);
   };
 
-  return { fillUpGrid, emptyGrid, getTurnCount, incrementTurnCount, addCross, addCircle };
+  return { fillUpGrid, emptyGrid, getTurnCount, incrementTurnCount, getPlayer, changePlayer, addCross, addCircle };
 })();
 
-Game.fillUpGrid();
+Game.fillUpGrid(function(e) {
+  const row = Number(e.currentTarget.dataset.row);
+  const col = Number(e.currentTarget.dataset.col);
 
-Game.addCross(1, 1);
-Game.addCircle(0, 0);
-Game.addCross(0, 2);
-Game.addCircle(2, 0);
+  if (GameBoard.isEmpty(row, col)) {
+    if (Game.getPlayer() > 0) {
+      Game.addCross(row, col);
+      GameBoard.playOne(row, col);
 
+    } else {
+      Game.addCircle(row, col);
+      GameBoard.playTwo(row, col);
+    }
+    const win = GameBoard.anyWins();
+    if (win) {
+      alert(`Player ${win} has won!`);
+    }
+    Game.changePlayer();
+  }
 
-/*
+});
 
-Select cell
-If cell is empty, place current player's sign, else do nothing
-Once a sign has been placed, change player
-Loop until game counter has reached 9 or there has been a win
-
-*/
