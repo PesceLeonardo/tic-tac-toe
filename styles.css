@@ -73,3 +73,35 @@ svg circle.out {
 svg circle.in {
   fill: white;
 }
+
+.vs-human {
+  grid-area: 1 / 1 / 2 / 4;
+}
+
+.vs-AI {
+  grid-area: 2 / 1 / 3 / 4;
+}
+
+.best-out-of-three {
+  grid-area: 3 / 1 / 4 / 4;
+}
+
+.vs-human,
+.vs-AI,
+.best-out-of-three {
+  background-color: white;
+  border: 4px solid black;
+  border-radius: 999px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 3rem;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  text-align: center;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+  }
+}

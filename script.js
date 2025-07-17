@@ -1,3 +1,7 @@
+/* ************** */
+/* * GAME BOARD * */
+/* ************** */
+
 const GameBoard = (function() {
   const grid = new Array(9);
 
@@ -85,6 +89,10 @@ const GameBoard = (function() {
   return { playOne, playTwo, getSquare, isEmpty, rowWins, colWins, diagWins, anyWins, resetBoard };
 })();
 
+/* ******** */
+/* * GAME * */
+/* ******** */
+
 function Player(name, ID, isAIOn) {
   console.assert(
     typeof name === "string" &&
@@ -106,6 +114,10 @@ function Player(name, ID, isAIOn) {
 
   return { isAI, getName, getID, getWins, hasWon, resetWins };
 }
+
+/* ************** */
+/* * GAME BOARD * */
+/* ************** */
 
 const Game = (function() {
   const _container = document.querySelector(".container");
@@ -190,25 +202,71 @@ const Game = (function() {
   return { fillUpGrid, emptyGrid, getTurnCount, incrementTurnCount, getPlayer, changePlayer, addCross, addCircle };
 })();
 
-Game.fillUpGrid(function(e) {
-  const row = Number(e.currentTarget.dataset.row);
-  const col = Number(e.currentTarget.dataset.col);
+const MainMenu = (function() {
+  const generateMainMenu = function(vsHumanEventListener, vsAIEventListener, bestOutOf3EventListener) {
+    const _container = document.querySelector("div.container");
 
-  if (GameBoard.isEmpty(row, col)) {
-    if (Game.getPlayer() > 0) {
-      Game.addCross(row, col);
-      GameBoard.playOne(row, col);
+    const _vsHuman = document.createElement("h1");
+    const _vsAI = document.createElement("h1");
+    const _bestOutOf3 = document.createElement("h1");
 
-    } else {
-      Game.addCircle(row, col);
-      GameBoard.playTwo(row, col);
+    _vsHuman.innerHTML = "Player vs Player";
+    _vsAI.innerHTML = "Player vs AI";
+    _bestOutOf3.innerHTML = "Player vs Player<br>Best out of Three!";
+
+    _vsHuman.classList.add("vs-human");
+    _vsAI.classList.add("vs-AI");
+    _bestOutOf3.classList.add("best-out-of-three");
+
+    _vsHuman.addEventListener("click", vsHumanEventListener);
+    _vsAI.addEventListener("click", vsAIEventListener);
+    _bestOutOf3.addEventListener("click", bestOutOf3EventListener);
+
+    _container.appendChild(_vsHuman);
+    _container.appendChild(_vsAI);
+    _container.appendChild(_bestOutOf3);
+  };
+
+  const deleteMainMenu = function() {
+    const _vsHuman = document.querySelector(".vs-human");
+    const _vsAI = document.querySelector(".vs-AI");
+    const _bestOutOf3 = document.querySelector(".best-out-of-three");
+
+    if (_vsHuman) {
+      _vsHuman.style.display = "none";
     }
-    const win = GameBoard.anyWins();
-    if (win) {
-      alert(`Player ${win} has won!`);
+    if (_vsAI) {
+      _vsAI.style.display = "none";
     }
-    Game.changePlayer();
+    if (_bestOutOf3) {
+      _bestOutOf3.style.display = "none";
+    }
   }
 
-});
+  return { generateMainMenu, deleteMainMenu };
+})();
 
+MainMenu.generateMainMenu(function(e) {
+  MainMenu.deleteMainMenu();
+  Game.fillUpGrid(function(e) {
+    const row = Number(e.currentTarget.dataset.row) + 1;
+    const col = Number(e.currentTarget.dataset.col);
+  
+    if (GameBoard.isEmpty(row, col)) {
+      if (Game.getPlayer() > 0) {
+        Game.addCross(row, col);
+        GameBoard.playOne(row, col);
+  
+      } else {
+        Game.addCircle(row, col);
+        GameBoard.playTwo(row, col);
+      }
+  
+      const win = GameBoard.anyWins();
+      if (win) {
+        alert(`Player ${win} has won!`);
+      }
+      Game.changePlayer();
+    }
+  });
+});
