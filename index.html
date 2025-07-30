@@ -8,11 +8,23 @@
   </head>
 
   <body>
-    <aside></aside>
+    <!-- TITLE SCREEN OPTIONS -->
+    <div class="title-container">
+      <button class="title PvE">Player VS AI</button>
+      <button class="title PvP">Player VS Player</button>
+      <button class="title best-of-5">Player vs Player:<br>Best of 5!</button>
+    </div>
+
+    <!-- GAME RESULT MESSAGES -->
+    <figure class="win vanish">CONGRATULATIONS!<br>PLAYER {} HAS WON!</figure>
+    <figure class="draw vanish">IT'S A DRAW!</figure>
+
+    <!-- MAIN CONTENT -->
+    <aside class="vanish"></aside>
     <main>
-      <div class="container"></div>
+      <div class="grid-container vanish"></div>
     </main>
-    <aside></aside>
+    <aside class="vanish"></aside>
     <script src="./script.js"></script>
   </body>
 

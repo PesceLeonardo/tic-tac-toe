@@ -2,8 +2,13 @@
 /* * GAME BOARD * */
 /* ************** */
 
+// Constant to check if a DRAW has been reached - avoid "magic numbers"
+const DRAW = 9;
+
 const GameBoard = (function() {
   const grid = new Array(9);
+  let turns = 0;
+  let gameState = 0;
 
   function assert(...indices) {
     for (const index of indices) {
@@ -17,11 +22,13 @@ const GameBoard = (function() {
   const playOne = (row, col) => {
     assert(row, col);
     grid[row * 3 + col] = 1;
+    turns++;
   };
 
   const playTwo = (row, col) => {
     assert(row, col);
     grid[row * 3 + col] = 2;
+    turns++;
   };
 
   const getSquare = (row, col) => {
@@ -86,7 +93,14 @@ const GameBoard = (function() {
     }
   };
 
-  return { playOne, playTwo, getSquare, isEmpty, rowWins, colWins, diagWins, anyWins, resetBoard };
+  const isDraw = () => turns >= 9;
+
+  const getGameState = () => gameState;
+  const updateGameState = (winner) => gameState = winner;
+
+  return { playOne, playTwo, getSquare, isEmpty,
+    rowWins, colWins, diagWins, anyWins,
+    resetBoard, isDraw, getGameState, updateGameState };
 })();
 
 /* ******** */
@@ -120,7 +134,7 @@ function Player(name, ID, isAIOn) {
 /* ************** */
 
 const Game = (function() {
-  const _container = document.querySelector(".container");
+  const _container = document.querySelector(".grid-container");
   let _isFilled = false;
   let _turnCounter = 0;
   let _currentPlayer = 1;
@@ -170,7 +184,7 @@ const Game = (function() {
       "M 1 2 C 0 1 1 0 2 1 L 5 4 L 8 1 C 9 0 10 1 9 2 L 6 5 L 9 8 C 10 9 9 10 8 9 L 5 6 L 2 9 C 1 10 0 9 1 8 L 4 5 Z");
     _svg.appendChild(_path);
 
-    const _nthCell = document.querySelector(`.container div:nth-child(${row * 3 + col + 1})`);
+    const _nthCell = document.querySelector(`.grid-container div:nth-child(${row * 3 + col + 1})`);
     _nthCell.appendChild(_svg);
   };
 
@@ -195,7 +209,7 @@ const Game = (function() {
     _circleIn.classList.add("in");
     _svg.appendChild(_circleIn);
 
-    const _nthCell = document.querySelector(`.container div:nth-child(${Number(row) * 3 + Number(col) + 1})`);
+    const _nthCell = document.querySelector(`.grid-container div:nth-child(${Number(row) * 3 + Number(col) + 1})`);
     _nthCell.appendChild(_svg);
   };
 
@@ -203,70 +217,74 @@ const Game = (function() {
 })();
 
 const MainMenu = (function() {
-  const generateMainMenu = function(vsHumanEventListener, vsAIEventListener, bestOutOf3EventListener) {
-    const _container = document.querySelector("div.container");
-
-    const _vsHuman = document.createElement("h1");
-    const _vsAI = document.createElement("h1");
-    const _bestOutOf3 = document.createElement("h1");
-
-    _vsHuman.innerHTML = "Player vs Player";
-    _vsAI.innerHTML = "Player vs AI";
-    _bestOutOf3.innerHTML = "Player vs Player<br>Best out of Three!";
-
-    _vsHuman.classList.add("vs-human");
-    _vsAI.classList.add("vs-AI");
-    _bestOutOf3.classList.add("best-out-of-three");
+  const generateMainMenu = function(vsHumanEventListener, vsAIEventListener, bestOfFiveEventListener) {
+    const _vsHuman = document.querySelector("button.PvP");
+    const _vsAI = document.querySelector("button.PvE");
+    const _bestOfFive = document.querySelector("button.best-of-5");
 
     _vsHuman.addEventListener("click", vsHumanEventListener);
     _vsAI.addEventListener("click", vsAIEventListener);
-    _bestOutOf3.addEventListener("click", bestOutOf3EventListener);
-
-    _container.appendChild(_vsHuman);
-    _container.appendChild(_vsAI);
-    _container.appendChild(_bestOutOf3);
+    _bestOfFive.addEventListener("click", bestOfFiveEventListener);
   };
 
-  const deleteMainMenu = function() {
-    const _vsHuman = document.querySelector(".vs-human");
-    const _vsAI = document.querySelector(".vs-AI");
-    const _bestOutOf3 = document.querySelector(".best-out-of-three");
+  const deleteMainMenu = function(addGrid = false) {
+    const _titleContainer = document.querySelector("div.title-container");
+    if (_titleContainer) _titleContainer.classList.add("vanish");
 
-    if (_vsHuman) {
-      _vsHuman.style.display = "none";
+    if (addGrid) {
+      const _gridContainer = document.querySelector("div.grid-container");
+      const _asideList = document.querySelectorAll("aside");
+      if (_gridContainer) _gridContainer.classList.remove("vanish");
+      for (const aside of _asideList) {
+        aside.classList.remove("vanish");
+      }
     }
-    if (_vsAI) {
-      _vsAI.style.display = "none";
-    }
-    if (_bestOutOf3) {
-      _bestOutOf3.style.display = "none";
-    }
-  }
+  };
 
-  return { generateMainMenu, deleteMainMenu };
+  const winMessage = (gameState) => {
+    if (gameState == DRAW) {
+      const _drawMessage = document.querySelector("figure.draw");
+      _drawMessage.classList.remove("vanish");
+    } else if (gameState != 0) {
+      const _winMessage = document.querySelector("figure.win");
+      _winMessage.innerHTML = `CONGRATULATIONS!<br>PLAYER ${gameState} HAS WON!`;
+      _winMessage.classList.remove("vanish");
+    }
+  };
+
+  return { generateMainMenu, deleteMainMenu, winMessage };
 })();
 
 MainMenu.generateMainMenu(function(e) {
-  MainMenu.deleteMainMenu();
+  MainMenu.deleteMainMenu(addGrid = true);
   Game.fillUpGrid(function(e) {
-    const row = Number(e.currentTarget.dataset.row) + 1;
-    const col = Number(e.currentTarget.dataset.col);
-  
-    if (GameBoard.isEmpty(row, col)) {
-      if (Game.getPlayer() > 0) {
-        Game.addCross(row, col);
-        GameBoard.playOne(row, col);
-  
-      } else {
-        Game.addCircle(row, col);
-        GameBoard.playTwo(row, col);
+    if (GameBoard.getGameState() == 0) {
+      const row = Number(e.currentTarget.dataset.row);
+      const col = Number(e.currentTarget.dataset.col);
+    
+      if (GameBoard.isEmpty(row, col)) {
+        if (Game.getPlayer() > 0) {
+          Game.addCross(row, col);
+          GameBoard.playOne(row, col);
+    
+        } else {
+          Game.addCircle(row, col);
+          GameBoard.playTwo(row, col);
+        }
+    
+        const win = GameBoard.anyWins();
+        if (win) {
+          GameBoard.updateGameState(win);
+          MainMenu.winMessage(GameBoard.getGameState());
+        }
+
+        const draw = GameBoard.isDraw() && !win;
+        if (draw) {
+          GameBoard.updateGameState(DRAW);
+          MainMenu.winMessage(GameBoard.getGameState());
+        }
+        Game.changePlayer();
       }
-  
-      const win = GameBoard.anyWins();
-      if (win) {
-        alert(`Player ${win} has won!`);
-      }
-      Game.changePlayer();
     }
   });
 });
