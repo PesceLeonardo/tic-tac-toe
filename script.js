@@ -4,11 +4,15 @@
 
 // Constant to check if a DRAW has been reached - avoid "magic numbers"
 const DRAW = 9;
+const AI = 0;
+const HUMAN = 1;
+const BEST_OF_5 = 2;
 
 const GameBoard = (function() {
   const grid = new Array(9);
   let turns = 0;
   let gameState = 0;
+  let currentMode = null;
 
   function assert(...indices) {
     for (const index of indices) {
@@ -93,14 +97,27 @@ const GameBoard = (function() {
     }
   };
 
+  const reset = (resetMode = false) => {
+    resetBoard();
+    turns = 0;
+    gameState = 0;
+    if (resetMode) {
+      currentMode = null;
+    }
+  }
+
   const isDraw = () => turns >= 9;
 
   const getGameState = () => gameState;
   const updateGameState = (winner) => gameState = winner;
 
+  const updateCurrentMode = (mode) => currentMode = mode;
+  const getCurrentMode = () => currentMode;
+
   return { playOne, playTwo, getSquare, isEmpty,
     rowWins, colWins, diagWins, anyWins,
-    resetBoard, isDraw, getGameState, updateGameState };
+    resetBoard, isDraw, getGameState, updateGameState,
+    updateCurrentMode, getCurrentMode, reset };
 })();
 
 /* ******** */
@@ -213,8 +230,79 @@ const Game = (function() {
     _nthCell.appendChild(_svg);
   };
 
-  return { fillUpGrid, emptyGrid, getTurnCount, incrementTurnCount, getPlayer, changePlayer, addCross, addCircle };
+  const reset = () => {
+    emptyGrid();
+    _turnCounter = 0;
+    _currentPlayer = 1;
+    _container.classList.add("vanish");
+  };
+
+  return { fillUpGrid, emptyGrid, getTurnCount, incrementTurnCount,
+    getPlayer, changePlayer, addCross, addCircle, reset };
 })();
+
+const Logic = (function() {
+  const LogicVsHuman = function(e) {
+    Game.updateCurrentMode = HUMAN;
+
+    MainMenu.deleteMainMenu(addGrid = true);
+    Game.fillUpGrid(function(e) {
+      if (GameBoard.getGameState() == 0) {
+        const row = Number(e.currentTarget.dataset.row);
+        const col = Number(e.currentTarget.dataset.col);
+      
+        if (GameBoard.isEmpty(row, col)) {
+          if (Game.getPlayer() > 0) {
+            Game.addCross(row, col);
+            GameBoard.playOne(row, col);
+      
+          } else {
+            Game.addCircle(row, col);
+            GameBoard.playTwo(row, col);
+          }
+      
+          const win = GameBoard.anyWins();
+          if (win) {
+            GameBoard.updateGameState(win);
+            MainMenu.winMessage(GameBoard.getGameState());
+            MainMenu.endOptions(GameBoard.getCurrentMode());
+          }
+
+          const draw = GameBoard.isDraw() && !win;
+          if (draw) {
+            GameBoard.updateGameState(DRAW);
+            MainMenu.winMessage(GameBoard.getGameState());
+            MainMenu.endOptions(GameBoard.getCurrentMode());
+          }
+          Game.changePlayer();
+        }
+      }
+    });
+  }
+
+  const LogicVsAI = null;
+  const LogicBestOutOf5 = null;
+
+  const ChooseLogic = (mode) => {
+    switch (mode) {
+      case HUMAN:
+        return LogicVsHuman;
+      case AI:
+        return LogicVsAI;
+      case BEST_OF_5:
+        return LogicBestOutOf5;
+    }
+  };
+
+  const Reset = function() {
+    MainMenu.reset();
+    Game.reset();
+    GameBoard.reset();
+    MainMenu.generateMainMenu(Logic.LogicVsHuman);
+  }
+
+  return { LogicVsHuman, LogicVsAI, LogicBestOutOf5, ChooseLogic, Reset }
+}());
 
 const MainMenu = (function() {
   const generateMainMenu = function(vsHumanEventListener, vsAIEventListener, bestOfFiveEventListener) {
@@ -241,6 +329,17 @@ const MainMenu = (function() {
     }
   };
 
+  const resetMainMenu = () => {
+    const _titleContainer = document.querySelector("div.title-container");
+    if (_titleContainer) _titleContainer.classList.remove("vanish");
+    const _gridContainer = document.querySelector("div.grid-container");
+    const _asideList = document.querySelectorAll("aside");
+    if (_gridContainer) _gridContainer.classList.add("vanish");
+    for (const aside of _asideList) {
+      aside.classList.add("vanish");
+    }
+  };
+
   const winMessage = (gameState) => {
     if (gameState == DRAW) {
       const _drawMessage = document.querySelector("div.draw");
@@ -253,39 +352,28 @@ const MainMenu = (function() {
     }
   };
 
-  return { generateMainMenu, deleteMainMenu, winMessage };
+  const endOptions = (mode) => {
+    const replay = document.querySelectorAll("button.play-again");
+    replay.forEach(function(e) {e.addEventListener("click", Logic.ChooseLogic(mode))});
+
+    const mainMenu = document.querySelectorAll("button.main-menu");
+    mainMenu.forEach(function (e) {e.addEventListener("click", Logic.Reset)});
+  };
+
+  const reset = () => {
+    const gameState = GameBoard.getGameState();
+    if (gameState == DRAW) {
+      const _drawMessage = document.querySelector("div.draw");
+      _drawMessage.classList.add("vanish");
+    } else if (gameState != 0) {
+      const _winDiv = document.querySelector("div.win");
+      _winDiv.classList.add("vanish");
+    }
+    resetMainMenu();
+  };
+
+  return { generateMainMenu, deleteMainMenu, winMessage, endOptions, reset };
 })();
 
-MainMenu.generateMainMenu(function(e) {
-  MainMenu.deleteMainMenu(addGrid = true);
-  Game.fillUpGrid(function(e) {
-    if (GameBoard.getGameState() == 0) {
-      const row = Number(e.currentTarget.dataset.row);
-      const col = Number(e.currentTarget.dataset.col);
-    
-      if (GameBoard.isEmpty(row, col)) {
-        if (Game.getPlayer() > 0) {
-          Game.addCross(row, col);
-          GameBoard.playOne(row, col);
-    
-        } else {
-          Game.addCircle(row, col);
-          GameBoard.playTwo(row, col);
-        }
-    
-        const win = GameBoard.anyWins();
-        if (win) {
-          GameBoard.updateGameState(win);
-          MainMenu.winMessage(GameBoard.getGameState());
-        }
+MainMenu.generateMainMenu(Logic.LogicVsHuman);
 
-        const draw = GameBoard.isDraw() && !win;
-        if (draw) {
-          GameBoard.updateGameState(DRAW);
-          MainMenu.winMessage(GameBoard.getGameState());
-        }
-        Game.changePlayer();
-      }
-    }
-  });
-});
