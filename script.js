@@ -7,12 +7,13 @@ const DRAW = 9;
 const AI = 0;
 const HUMAN = 1;
 const BEST_OF_5 = 2;
+const NULL_FUNCTION = () => null;
 
 const GameBoard = (function() {
   const grid = new Array(9);
   let turns = 0;
   let gameState = 0;
-  let currentMode = null;
+  let currentMode = HUMAN;  // Defaults to HUMAN
 
   function assert(...indices) {
     for (const index of indices) {
@@ -230,11 +231,12 @@ const Game = (function() {
     _nthCell.appendChild(_svg);
   };
 
-  const reset = () => {
+  const reset = (c = true) => {
     emptyGrid();
     _turnCounter = 0;
     _currentPlayer = 1;
-    _container.classList.add("vanish");
+    _isFilled = false;
+    if (c) { _container.classList.add("vanish"); }
   };
 
   return { fillUpGrid, emptyGrid, getTurnCount, incrementTurnCount,
@@ -242,55 +244,71 @@ const Game = (function() {
 })();
 
 const Logic = (function() {
-  const LogicVsHuman = function(e) {
-    Game.updateCurrentMode = HUMAN;
+  const gameLogic = function(e) {
+    if (GameBoard.getGameState() == 0) {
+      const row = Number(e.currentTarget.dataset.row);
+      const col = Number(e.currentTarget.dataset.col);
 
-    MainMenu.deleteMainMenu(addGrid = true);
-    Game.fillUpGrid(function(e) {
-      if (GameBoard.getGameState() == 0) {
-        const row = Number(e.currentTarget.dataset.row);
-        const col = Number(e.currentTarget.dataset.col);
-      
-        if (GameBoard.isEmpty(row, col)) {
-          if (Game.getPlayer() > 0) {
-            Game.addCross(row, col);
-            GameBoard.playOne(row, col);
-      
-          } else {
-            Game.addCircle(row, col);
-            GameBoard.playTwo(row, col);
-          }
-      
-          const win = GameBoard.anyWins();
-          if (win) {
-            GameBoard.updateGameState(win);
-            MainMenu.winMessage(GameBoard.getGameState());
-            MainMenu.endOptions(GameBoard.getCurrentMode());
-          }
+      if (GameBoard.isEmpty(row, col)) {
+        if (Game.getPlayer() > 0) {
+          Game.addCross(row, col);
+          GameBoard.playOne(row, col);
 
-          const draw = GameBoard.isDraw() && !win;
-          if (draw) {
-            GameBoard.updateGameState(DRAW);
-            MainMenu.winMessage(GameBoard.getGameState());
-            MainMenu.endOptions(GameBoard.getCurrentMode());
-          }
-          Game.changePlayer();
+        } else {
+          Game.addCircle(row, col);
+          GameBoard.playTwo(row, col);
+        }
+
+        const win = GameBoard.anyWins();
+        if (win) {
+          GameBoard.updateGameState(win);
+          MainMenu.winMessage(GameBoard.getGameState());
+          MainMenu.endOptions(GameBoard.getCurrentMode());
+        }
+        const draw = GameBoard.isDraw() && !win;
+        if (draw) {
+          GameBoard.updateGameState(DRAW);
+          MainMenu.winMessage(GameBoard.getGameState());
+          MainMenu.endOptions(GameBoard.getCurrentMode());
+        }
+        Game.changePlayer();
         }
       }
-    });
+    }
+
+  const LogicVsHuman = function(e) {
+    GameBoard.updateCurrentMode(HUMAN);
+
+    MainMenu.deleteMainMenu(addGrid = true);
+    Game.fillUpGrid(gameLogic);
   }
 
-  const LogicVsAI = null;
-  const LogicBestOutOf5 = null;
+  const LogicVsAI = NULL_FUNCTION;   // Empty WIP
+  const LogicBestOutOf5 = NULL_FUNCTION;   // Empty WIP
 
   const ChooseLogic = (mode) => {
+    const wrap = () => {
+      const prevState = GameBoard.getGameState();
+      Game.reset(false);
+      GameBoard.reset();
+      MainMenu.hideEndMessage(prevState);
+    };
+
+    let f = NULL_FUNCTION;
     switch (mode) {
       case HUMAN:
-        return LogicVsHuman;
+        f = LogicVsHuman;
+        break;
       case AI:
-        return LogicVsAI;
+        f = LogicVsAI;
+        break;
       case BEST_OF_5:
-        return LogicBestOutOf5;
+        f = LogicBestOutOf5;
+        break;
+    }
+    return () => {
+      wrap();
+      f();
     }
   };
 
@@ -360,19 +378,23 @@ const MainMenu = (function() {
     mainMenu.forEach(function (e) {e.addEventListener("click", Logic.Reset)});
   };
 
-  const reset = () => {
-    const gameState = GameBoard.getGameState();
-    if (gameState == DRAW) {
+  const hideEndMessage = (mode) => {
+    if (mode == DRAW) {
       const _drawMessage = document.querySelector("div.draw");
       _drawMessage.classList.add("vanish");
-    } else if (gameState != 0) {
+    } else if (mode != 0) {
       const _winDiv = document.querySelector("div.win");
       _winDiv.classList.add("vanish");
     }
+  };
+
+  const reset = () => {
+    const gameState = GameBoard.getGameState();
+    hideEndMessage(gameState);
     resetMainMenu();
   };
 
-  return { generateMainMenu, deleteMainMenu, winMessage, endOptions, reset };
+  return { generateMainMenu, deleteMainMenu, winMessage, endOptions, hideEndMessage, reset };
 })();
 
 MainMenu.generateMainMenu(Logic.LogicVsHuman);
