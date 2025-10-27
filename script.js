@@ -243,12 +243,13 @@ const MainMenu = (function() {
 
   const winMessage = (gameState) => {
     if (gameState == DRAW) {
-      const _drawMessage = document.querySelector("figure.draw");
+      const _drawMessage = document.querySelector("div.draw");
       _drawMessage.classList.remove("vanish");
     } else if (gameState != 0) {
-      const _winMessage = document.querySelector("figure.win");
+      const _winDiv = document.querySelector("div.win");
+      const _winMessage = document.querySelector("div.win figure")
       _winMessage.innerHTML = `CONGRATULATIONS!<br>PLAYER ${gameState} HAS WON!`;
-      _winMessage.classList.remove("vanish");
+      _winDiv.classList.remove("vanish");
     }
   };
 

@@ -14,10 +14,8 @@
   --background-shadow: rgba(0, 0, 0, 0.6);
 }
 
-div.vanish,
-aside.vanish,
-figure.vanish {
-  display: none;
+.vanish {
+  display: none !important;
 }
 
 body {
@@ -126,7 +124,7 @@ svg circle.in {
   fill: white;
 }
 
-figure {
+div.end-game {
   --fig-height: 24vh;
   --fig-width: 72vw;
 
@@ -153,7 +151,55 @@ figure {
   align-items: center;
 }
 
-figure.draw {
+div.draw {
   letter-spacing: 16px;
   border-color: red;
+}
+
+.player-name {
+  --input-height: 24vh;
+  --input-width: 48vw;
+  --input-gap: 24px;
+
+  position: absolute;
+  height: var(--input-height);
+  width: var(--input-width);
+  
+  top: calc((100vh - var(--input-height)) / 2);
+  right: calc((100vw - var(--input-width)) / 2);
+
+  background-color: white;
+  border: 4px solid black;
+  border-radius: 16px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.player-name div {
+  display: flex;
+  align-items: center;
+}
+
+.player-name p {
+  width: calc(var(--input-width) / 4);
+  text-align: center;
+  font-size: calc(var(--input-height) * 0.2);
+  letter-spacing: calc(var(--input-width) * 0.0025);
+}
+
+.player-name input {
+  margin-right: 24px;
+  padding-left: 8px;
+
+  flex: 1;
+  height: 100%;
+  font-size: calc(var(--input-height) * 0.2);
+}
+
+.player-name button {
+  height: 200%;
+  width: calc(var(--input-width) / 4);
 }
