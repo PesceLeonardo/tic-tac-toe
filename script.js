@@ -2,7 +2,7 @@
 /* * GAME BOARD * */
 /* ************** */
 
-// Constant to check if a DRAW has been reached - avoid "magic numbers"
+// Constants - avoid "magic numbers"
 const DRAW = 9;
 const AI = 0;
 const HUMAN = 1;
